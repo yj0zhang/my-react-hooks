@@ -10,6 +10,11 @@ let stateIndex = 0;
 const effectDepArr = [];//保存上次渲染时的依赖(dep)
 let effectIndex = 0;
 
+const memoArr = [];
+const callbackArr = [];
+let memoIndex = 0;
+let callbackIndex = 0;
+
 function createState(initialState, stateIndex) {
     return states[stateIndex] ? states[stateIndex] : initialState;
 }
@@ -70,9 +75,49 @@ export function memo(Fc) {
         }
     }
 }
+
+export function useMemo(cb, depArr) {
+    if (memoArr[memoIndex]) {
+        const [_memo, _depArr] = memoArr[memoIndex];
+        const isFullySame = depArr.every((dep, index) => dep === _depArr[index]);
+        if (isFullySame) {
+            memoIndex++;
+            return _memo
+        } else {
+            return setNewMemo(cb, depArr);
+        }
+    } else {
+        return setNewMemo(cb, depArr);
+    }
+    function setNewMemo(cb, depArr) {
+        const memo = cb();
+        memoArr[memoIndex ++] = [memo, depArr];
+        return memo;
+    }
+}
+export function useCallback(cb, depArr) {
+    if (callbackArr[callbackIndex]) {
+        const [_cb, _depArr] = callbackArr[callbackIndex];
+        const isFullySame = depArr.every((dep, index) => dep === _depArr[index]);
+        if (isFullySame) {
+            callbackIndex++;
+            return _cb;
+        } else {
+            return setNewCallback(cb, depArr)
+        }
+    } else {
+        return setNewCallback(cb, depArr)
+    }
+    function setNewCallback(cb, depArr) {
+        callbackArr[callbackIndex++] = [cb, depArr];
+        return cb
+    }
+}
 async function render() {
     const App = (await import('./App2')).default;
     stateIndex = 0;
     effectIndex = 0;
+    memoIndex = 0;
+    callbackIndex = 0;
     root.render(<App/>)
 }

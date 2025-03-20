@@ -1,12 +1,15 @@
 // const { createRoot } = ReactDOM;
 // const root = createRoot(document.getElementById('app'));
-const {
-    useMemo,
-} = React;
+// const {
+//     useMemo,
+//     useCallback,
+// } = React;
 import {
     root,
     useState,
-    memo
+    memo,
+    useMemo,
+    useCallback,
 } from './React'
 
 const Child = memo((props) => {
@@ -14,6 +17,7 @@ const Child = memo((props) => {
     return (
         <div>
             <h1>count2: {props.childData.count2}</h1>
+            <button onClick={props.setCount2}>+</button>
     </div>
     )
 })
@@ -23,30 +27,27 @@ function App() {
     const countIncreasement = () => {
         setCount(count + 1)
     };
-    const countDecreasement = () => {
-        setCount(count - 1)
-    };
-
     const [count2, setCount2] = useState(0);
-    const count2Increasement = () => {
-        setCount2(count2 + 1)
-    };
     const childData = useMemo(() => ({
         count2
     }), [count2])
-    // const count2Decreasement = () => {
-    //     setCount2(count2 - 1)
-    // };
+    // const cbSetCount2 = useCallback(() => {
+    //     // 用函数避免闭包陷阱
+    //     setCount2(count2 => count2 + 1)
+    // }, []);
+    const cbSetCount2 = useCallback(() => {
+        setCount2(count2 + 1)
+    }, []);
 
     return (
         <div>
             <h1>count1: { count}</h1>
             <button onClick={countIncreasement}>+</button>
-            <button onClick={countDecreasement}>-</button>
+            {/* <button onClick={countDecreasement}>-</button> */}
 
 
-            <Child childData={childData} />
-            <button onClick={count2Increasement}>+</button>
+            <Child childData={childData} setCount2={ cbSetCount2 } />
+            {/* <button onClick={count2Increasement}>+</button> */}
         </div>
     )
 }
