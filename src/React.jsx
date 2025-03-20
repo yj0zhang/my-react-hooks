@@ -1,3 +1,4 @@
+import PureComponent from './PureComponent';
 const { createRoot } = ReactDOM;
 export const root = createRoot(document.getElementById('app'));
 
@@ -61,8 +62,16 @@ export function useEffect(cb, depArr) {
     effectDepArr[effectIndex] = depArr;
     effectIndex++;
 }
+
+export function memo(Fc) {
+    return class extends PureComponent {
+        render() {
+            return Fc(this.props)
+        }
+    }
+}
 async function render() {
-    const App = (await import('./App')).default;
+    const App = (await import('./App2')).default;
     stateIndex = 0;
     effectIndex = 0;
     root.render(<App/>)
